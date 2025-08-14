@@ -1,19 +1,20 @@
+
 <template>
   <div class="container">
     <header>
       <h1>🧠 Vue Matching Cards</h1>
       <div class="controls">
         <select id="categories" v-model="query" @change="resetGame">
-          <option id="nature" value="nature">Nature</option>
-          <option id="animals" value="animals">Animals</option>
-          <option id="travel" value="travel">Travel</option>
-          <option id="technology" value="technology">Technology</option>
-          <option id="food" value="food">Food</option>
+          <option value="animals">Animals</option>
+          <option value="nature">Nature</option>
+          <option value="travel">Travel</option>
+          <option value="technology">Technology</option>
+          <option value="food">Food</option>
         </select>
         <select id="size" v-model.number="pairs" @change="resetGame">
-          <option id="v6" :value="6">6 pairs (12 cards)</option>
-          <option id="v8" :value="8">8 pairs (16 cards)</option>
-          <option id="v10" :value="10">10 pairs (20 cards)</option>
+          <option :value="6">6 pairs (12 cards)</option>
+          <option :value="8">8 pairs (16 cards)</option>
+          <option :value="10">10 pairs (20 cards)</option>
         </select>
         <button @click="resetGame">🔄 Reset</button>
       </div>
@@ -109,10 +110,6 @@ async function fetchUnsplashImages(topic, count) {
   url.searchParams.set('orientation', 'squarish')
   url.searchParams.set('content_filter', 'high')
 
-console.log(`Fetching ${count} images for topic "${topic}" from Unsplash...`)
-  console.log(`Using access key: ${accessKey}`)
-  console.log(`Request URL: ${url}`)
-
   const res = await fetch(url, {
     headers: {
       Authorization: `Client-ID ${accessKey}`
@@ -121,19 +118,15 @@ console.log(`Fetching ${count} images for topic "${topic}" from Unsplash...`)
   if (!res.ok) {
     console.warn('Unsplash fetch failed, falling back to placeholders.')
     const urls = Array.from({ length: count }, (_, i) => `https://picsum.photos/seed/${topic}-${i}/300/300`)
-    console.log(`Using placeholder images: ${urls}`)
     return urls
   }
   const data = await res.json()
-  console.log(`Fetched ${data.results.length} images from Unsplash.`)
   const urls = (data.results || []).slice(0, count).map(r => r.urls && (r.urls.small_s3 || r.urls.small || r.urls.thumb)).filter(Boolean)
 
-  console.log(`Using ${urls} images for the game.`)
   // If not enough images, fill with placeholders
   while (urls.length < count) {
     urls.push(`https://picsum.photos/seed/${topic}-${urls.length}/300/300`)
   }
-  console.log(`Fetched ${urls} images for topic "${topic}".`)
   return urls
 }
 
@@ -150,8 +143,6 @@ async function setupGame() {
     { uid: `a-${i}`, url: u, flipped: false, matched: false, pair: i },
     { uid: `b-${i}`, url: u, flipped: false, matched: false, pair: i }
   ])
-
-  console.log(JSON.stringify(deck, null, 2) + `\nDeck size: ${deck.length} cards.`)
 
   cards.value = shuffle(deck)
 }
